@@ -14,7 +14,7 @@ const Image = () => {
         setMessage(prev => [...prev, userMessage]);
 
         try {
-            const response = await fetch("http://127.0.0.1:5000/Image", {
+            const response = await fetch("https://chatbotwithimagebackend.onrender.com/Image", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: input })
