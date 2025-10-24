@@ -9,8 +9,7 @@ const Image = () => {
     const sendMessage = async () => {
         if (!input.trim()) return;
 
-        const userMessage = { role: "user", content: input };
-        setMessages(prev => [...prev, userMessage]);
+        setMessages(prev => [...prev, { role: "user", content: input }]);
 
         try {
             const response = await fetch(
@@ -24,10 +23,11 @@ const Image = () => {
 
             const data = await response.json();
 
-            if (data.image_url) {
+            if (data.image_base64) {
+                // Display image directly using base64
                 setMessages(prev => [
                     ...prev,
-                    { role: "bot", content: data.image_url }
+                    { role: "bot", content: `data:image/png;base64,${data.image_base64}` }
                 ]);
             } else {
                 setError("Failed to generate image");
@@ -67,4 +67,3 @@ const Image = () => {
 };
 
 export default Image;
-
