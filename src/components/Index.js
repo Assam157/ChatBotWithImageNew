@@ -37,7 +37,7 @@ const Index = () => {
   return (
     <div className="landing-page">
       <header>
-        <h1>Maitreya Guptas ChatBot</h1>
+        <h1>Balai Chand</h1>
         <p>Chat with our AI assistant!</p>
       </header>
 
@@ -60,3 +60,4 @@ const Index = () => {
 };
 
 export default Index;
+
