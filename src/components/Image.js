@@ -2,68 +2,89 @@ import React, { useState } from "react";
 import "./Image.css";
 
 const Image = () => {
-    const [messages, setMessages] = useState([]);
-    const [error, setError] = useState("");
-    const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [error, setError] = useState("");
 
-    const sendMessage = async () => {
-        if (!input.trim()) return;
+  // Backend base URL
+  const BASE_URL = "https://chatbotwithimagebackend.onrender.com";
 
-        setMessages(prev => [...prev, { role: "user", content: input }]);
+  const sendMessage = async () => {
+    if (!input.trim()) return;
 
-        try {
-            const response = await fetch(
-                "https://chatbotwithimagebackend.onrender.com/image",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: input })
-                }
-            );
+    // Add user message
+    setMessages((prev) => [...prev, { role: "user", content: input }]);
 
-            const data = await response.json();
+    try {
+      // ===== IMAGE REQUEST =====
+      const imgResponse = await fetch(`${BASE_URL}/image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
+      });
+      const imgData = await imgResponse.json();
 
-            if (data.image_base64) {
-                // Display image directly using base64
-                setMessages(prev => [
-                    ...prev,
-                    { role: "bot", content: `data:image/png;base64,${data.image_base64}` }
-                ]);
-            } else {
-                setError("Failed to generate image");
-            }
-        } catch (err) {
-            setError("Error occurred while generating image");
-            console.error(err);
-        } finally {
-            setInput("");
-        }
-    };
+      if (imgData.image_base64) {
+        const imgSrc = `data:image/png;base64,${imgData.image_base64}`;
+        setMessages((prev) => [...prev, { role: "bot", content: imgSrc }]);
+      } else {
+        setError("Failed to generate image");
+      }
 
-    return (
-        <div className="ImageGenerator">
-            <h1>Image Generator</h1>
-            <div className="inputWrapper">
-                <input
-                    placeholder="Enter image prompt"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                />
-                <button onClick={sendMessage}>Generate Image</button>
+      // ===== CHAT REQUEST (optional) =====
+      const chatResponse = await fetch(`${BASE_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
+      });
+      const chatData = await chatResponse.json();
+      if (chatData.reply) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "bot", content: chatData.reply },
+        ]);
+      }
+
+    } catch (err) {
+      setError("Error connecting to backend");
+      console.error(err);
+    } finally {
+      setInput("");
+    }
+  };
+
+  return (
+    <div className="ImageGenerator">
+      <h1>Image & Chat Bot</h1>
+      <div className="inputWrapper">
+        <input
+          placeholder="Enter your prompt"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        />
+        <button onClick={sendMessage}>Send</button>
+      </div>
+
+      {error && <p className="error">{error}</p>}
+
+      <div className="GeneratedImage">
+        {messages.map((msg, index) =>
+          msg.role === "bot" ? (
+            <div key={index}>
+              {msg.content.startsWith("data:image") ? (
+                <img src={msg.content} alt="Generated" />
+              ) : (
+                <p>{msg.content}</p>
+              )}
             </div>
-
-            {error && <p className="error">{error}</p>}
-
-            <div className="GeneratedImage">
-                {messages.map((msg, index) =>
-                    msg.role === "bot" ? (
-                        <img key={index} src={msg.content} alt="Generated" />
-                    ) : null
-                )}
-            </div>
-        </div>
-    );
+          ) : (
+            <p key={index} className="userMessage">{msg.content}</p>
+          )
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Image;
