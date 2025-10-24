@@ -1,0 +1,45 @@
+.ImageGenerator {
+  max-width: 600px;
+  margin: auto;
+  font-family: Arial, sans-serif;
+}
+
+.inputWrapper {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px 15px;
+  margin-left: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.GeneratedImage img {
+  max-width: 100%;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+}
+
+.userMessage {
+  text-align: right;
+  color: blue;
+  margin: 5px 0;
+}
+
+.botMessage {
+  text-align: left;
+  color: green;
+  margin: 5px 0;
+}
+
+.error {
+  color: red;
+}
