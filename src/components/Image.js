@@ -13,7 +13,7 @@ const Image = () => {
 
         try {
             const response = await fetch(
-                "https://chatbotwithimagebackend.onrender.com/Image",
+                "https://chatbotwithimagebackend.onrender.com/image",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -67,3 +67,4 @@ const Image = () => {
 };
 
 export default Image;
+
