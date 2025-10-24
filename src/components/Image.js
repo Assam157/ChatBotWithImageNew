@@ -11,6 +11,7 @@ const Image = () => {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+    setError(""); // Clear previous errors
 
     // Add user message
     setMessages((prev) => [...prev, { role: "user", content: input }]);
@@ -22,14 +23,18 @@ const Image = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input }),
       });
+
+      if (!imgResponse.ok) {
+        const errData = await imgResponse.json();
+        setError(errData.error || "Image generation failed");
+        return;
+      }
+
       const imgData = await imgResponse.json();
 
       if (imgData.image_base64) {
-        // Prepend data URI prefix for base64
         const imgSrc = `data:image/png;base64,${imgData.image_base64}`;
         setMessages((prev) => [...prev, { role: "bot", content: imgSrc }]);
-      } else {
-        setError("Failed to generate image");
       }
 
       // ===== CHAT REQUEST =====
@@ -38,14 +43,21 @@ const Image = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input }),
       });
-      const chatData = await chatResponse.json();
 
+      if (!chatResponse.ok) {
+        const errData = await chatResponse.json();
+        setError(errData.error || "Chat failed");
+        return;
+      }
+
+      const chatData = await chatResponse.json();
       if (chatData.reply) {
         setMessages((prev) => [...prev, { role: "bot", content: chatData.reply }]);
       }
+
     } catch (err) {
-      setError("Error connecting to backend");
       console.error(err);
+      setError("Error connecting to backend");
     } finally {
       setInput("");
     }
@@ -70,9 +82,16 @@ const Image = () => {
 
       <div className="GeneratedImage">
         {messages.map((msg, index) => (
-          <div key={index} className={msg.role === "user" ? "userMessage" : "botMessage"}>
+          <div
+            key={index}
+            className={msg.role === "user" ? "userMessage" : "botMessage"}
+          >
             {msg.role === "bot" && msg.content.startsWith("data:image") ? (
-              <img src={msg.content} alt="Generated" />
+              <img
+                src={msg.content}
+                alt="Generated"
+                style={{ maxWidth: "100%", height: "auto" }}
+              />
             ) : (
               <p>{msg.content}</p>
             )}
@@ -84,3 +103,5 @@ const Image = () => {
 };
 
 export default Image;
+
+
