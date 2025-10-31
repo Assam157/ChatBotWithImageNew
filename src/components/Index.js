@@ -8,7 +8,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   // ✅ Read from environment variable
-  const HF_ACCESS_TOKEN = process.env.HFACESSTOKEN;
+  const HF_ACCESS_TOKEN = process.env.REACT_APP_HF_ACCESS_TOKEN;
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -75,5 +75,6 @@ const Index = () => {
 };
 
 export default Index;
+
 
 
