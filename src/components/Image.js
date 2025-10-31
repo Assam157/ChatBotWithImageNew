@@ -24,7 +24,7 @@ const Image = () => {
       // ===== IMAGE GENERATION =====
       const imgResp = await fetch(`${BASE_URL}/image`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Accept": "application/json" },
         body: JSON.stringify({ message: input }),
       });
 
@@ -163,5 +163,6 @@ const Image = () => {
 };
 
 export default Image;
+
 
 
