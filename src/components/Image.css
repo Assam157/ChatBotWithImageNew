@@ -1,45 +1,72 @@
 .ImageGenerator {
-  max-width: 600px;
-  margin: auto;
-  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
 }
 
-.inputWrapper {
+.inputWrapper,
+.modifyWrapper {
   display: flex;
+  justify-content: center;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
-input {
-  flex: 1;
+input[type="text"],
+input[type="file"] {
   padding: 10px;
   font-size: 16px;
+  width: 250px;
 }
 
 button {
-  padding: 10px 15px;
-  margin-left: 10px;
-  font-size: 16px;
+  padding: 10px 20px;
+  background-color: #0066ff;
+  color: white;
+  border: none;
   cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
 }
 
-.GeneratedImage img {
-  max-width: 100%;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-}
-
-.userMessage {
-  text-align: right;
-  color: blue;
-  margin: 5px 0;
-}
-
-.botMessage {
-  text-align: left;
-  color: green;
-  margin: 5px 0;
+button:hover {
+  background-color: #004ccc;
 }
 
 .error {
   color: red;
+  margin-bottom: 10px;
 }
+
+.GeneratedImage {
+  margin-top: 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.userMessage,
+.botMessage {
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 70%;
+}
+
+.userMessage {
+  background-color: #dbeafe;
+  align-self: flex-end;
+}
+
+.botMessage {
+  background-color: #f3f4f6;
+  align-self: flex-start;
+}
+
+img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
