@@ -1,29 +1,36 @@
-import{ React, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./App.css"; // Import styles
+import "./App.css";
 
 const Index = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+
+  // ✅ Read from environment variable
+  const HF_ACCESS_TOKEN = process.env.HFACESSTOKEN;
 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
     const userMessage = { role: "user", content: input };
-    setMessages([...messages, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
 
     try {
       const response = await fetch("https://chatbotwithimagebackend.onrender.com/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${HF_ACCESS_TOKEN}`, // ✅ injected from env
+        },
         body: JSON.stringify({ message: input }),
       });
 
       const data = await response.json();
+      console.log("Response:", data);
 
       if (data.reply) {
-        setMessages([...messages, userMessage, { role: "bot", content: data.reply }]);
+        setMessages((prev) => [...prev, { role: "bot", content: data.reply }]);
       } else {
         console.error("API Error:", data);
       }
@@ -49,15 +56,24 @@ const Index = () => {
             </div>
           ))}
         </div>
+
         <div className="input-container">
-          <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type a message..." />
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message..."
+          />
           <button onClick={sendMessage}>Send</button>
         </div>
-        <button className="Image Generator" onClick={()=>navigate("/Image")}>Go To Image Generation Page</button>
+
+        <button className="Image Generator" onClick={() => navigate("/Image")}>
+          Go To Image Generation Page
+        </button>
       </div>
     </div>
   );
 };
 
 export default Index;
+
 
