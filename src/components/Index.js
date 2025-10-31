@@ -20,7 +20,7 @@ const Index = () => {
       const response = await fetch("https://chatbotwithimagebackend.onrender.com/chat", {
         method: "POST",
         headers: {
-          "Accept": "application/json",
+          "Content-Type": "application/json",
           Authorization: `Bearer ${HF_ACCESS_TOKEN}`, // ✅ injected from env
         },
         body: JSON.stringify({ message: input }),
@@ -75,6 +75,7 @@ const Index = () => {
 };
 
 export default Index;
+
 
 
 
