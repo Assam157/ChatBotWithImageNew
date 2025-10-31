@@ -43,7 +43,7 @@ const Image = () => {
       // ===== CHAT RESPONSE =====
       const chatResp = await fetch(`${BASE_URL}/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Accept": "application/json" },
         body: JSON.stringify({ message: input }),
       });
 
@@ -163,6 +163,7 @@ const Image = () => {
 };
 
 export default Image;
+
 
 
 
