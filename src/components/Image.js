@@ -78,10 +78,10 @@ const Image = () => {
 
     try {
       const formData = new FormData();
-      formData.append("image", file); // 👈 matches Flask backend
+      formData.append("file", file); // 👈 matches Flask backend
       formData.append("prompt", modPrompt);
 
-      const resp = await fetch(`${BASE_URL}/modify_image`, {
+      const resp = await fetch(`${BASE_URL}/image_modify`, {
         method: "POST",
         body: formData,
       });
@@ -161,3 +161,4 @@ const Image = () => {
 };
 
 export default Image;
+
