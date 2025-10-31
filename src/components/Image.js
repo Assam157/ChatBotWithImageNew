@@ -66,44 +66,46 @@ const Image = () => {
   // ===============================
   // IMAGE MODIFICATION
   // ===============================
-  const modifyImage = async () => {
-    if (!file) return setError("Please upload an image first");
-    if (!modPrompt.trim()) return setError("Please enter a modification prompt");
+   const modifyImage = async () => {
+  if (!file) return setError("Please upload an image first");
+  if (!modPrompt.trim()) return setError("Please enter a modification prompt");
 
-    setError("");
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", content: `Modify image: ${modPrompt}` },
-    ]);
+  setError("");
+  setMessages((prev) => [
+    ...prev,
+    { role: "user", content: `Modify image: ${modPrompt}` },
+  ]);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file); // 👈 matches Flask backend
-      formData.append("prompt", modPrompt);
+  try {
+    const formData = new FormData();
+    formData.append("file", file); // must match Flask backend key
+    formData.append("prompt", modPrompt);
 
-      const resp = await fetch(`${BASE_URL}/image_modify`, {
-        method: "POST",
-        body: formData,
-      });
+    const resp = await fetch(`${BASE_URL}/image_modify`, {
+      method: "POST",
+      body: formData,
+    });
 
-      const data = await resp.json();
+    const data = await resp.json();
 
-      if (data.image) {
-        // The backend returns base64 — convert to a data URL
-        const imageUrl = `data:image/png;base64,${data.image}`;
-        setMessages((prev) => [...prev, { role: "bot", content: imageUrl }]);
-      } else {
-        setError("Image modification failed");
-        console.error("Response:", data);
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Error modifying image");
-    } finally {
-      setFile(null);
-      setModPrompt("");
+    // ✅ FIX: Check for modified_image_url
+    if (data.modified_image_url) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", content: data.modified_image_url },
+      ]);
+    } else {
+      setError("Image modification failed");
+      console.error("Response:", data);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setError("Error modifying image");
+  } finally {
+    setFile(null);
+    setModPrompt("");
+  }
+};
 
   return (
     <div className="ImageGenerator">
@@ -161,4 +163,5 @@ const Image = () => {
 };
 
 export default Image;
+
 
