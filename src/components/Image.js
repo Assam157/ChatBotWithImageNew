@@ -81,7 +81,7 @@ const Image = () => {
     formData.append("file", file); // must match Flask backend key
     formData.append("prompt", modPrompt);
 
-    const resp = await fetch(`${BASE_URL}/image_modify`, {
+    const resp = await fetch(`${BASE_URL}/modify_image`, {
       method: "POST",
       body: formData,
     });
@@ -163,6 +163,7 @@ const Image = () => {
 };
 
 export default Image;
+
 
 
 
