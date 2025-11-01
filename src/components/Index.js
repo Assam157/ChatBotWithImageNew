@@ -7,9 +7,6 @@ const Index = () => {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
 
-  // ✅ Read from environment variable
-  const HF_ACCESS_TOKEN = process.env.HFACCESSTOKEN;
-
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -21,7 +18,6 @@ const Index = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${HF_ACCESS_TOKEN}`, // ✅ injected from env
         },
         body: JSON.stringify({ message: input }),
       });
@@ -31,11 +27,23 @@ const Index = () => {
 
       if (data.reply) {
         setMessages((prev) => [...prev, { role: "bot", content: data.reply }]);
+      } else if (data.error) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "bot", content: `⚠️ Error: ${data.error}` },
+        ]);
       } else {
-        console.error("API Error:", data);
+        setMessages((prev) => [
+          ...prev,
+          { role: "bot", content: "⚠️ No response from AI." },
+        ]);
       }
     } catch (error) {
       console.error("Request failed:", error);
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", content: "⚠️ Server error. Please try again." },
+      ]);
     }
 
     setInput("");
@@ -62,11 +70,12 @@ const Index = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type a message..."
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
           <button onClick={sendMessage}>Send</button>
         </div>
 
-        <button className="Image Generator" onClick={() => navigate("/Image")}>
+        <button className="Image Generator" onClick={() => navigate("/image")}>
           Go To Image Generation Page
         </button>
       </div>
@@ -75,9 +84,5 @@ const Index = () => {
 };
 
 export default Index;
-
-
-
-
 
 
