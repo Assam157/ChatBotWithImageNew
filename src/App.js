@@ -14,3 +14,4 @@ root.render(
     </Routes>
   </Router>
 );
+export default App;
