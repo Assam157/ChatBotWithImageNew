@@ -8,8 +8,8 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Local Flask backend
-  const BASE_URL = "http://127.0.0.1:5000";
+  // 🌐 Use your deployed Render backend
+  const BASE_URL = "https://chatbotwithimagebackend.onrender.com";
 
   const sendMessage = async () => {
     if (!input.trim()) {
@@ -48,7 +48,11 @@ const Index = () => {
       console.error("Request failed:", error);
       setMessages((prev) => [
         ...prev,
-        { role: "bot", content: "❌ Server not reachable. Check Flask." },
+        {
+          role: "bot",
+          content:
+            "❌ Server not reachable. Please check the deployed backend on Render.",
+        },
       ]);
     } finally {
       setInput("");
@@ -60,7 +64,7 @@ const Index = () => {
     <div className="landing-page">
       <header>
         <h1>🧠 Balai Chand</h1>
-        <p>Chat with your local AI assistant</p>
+        <p>Chat with your AI assistant hosted on Render</p>
       </header>
 
       <div className="chat-container">
@@ -97,5 +101,3 @@ const Index = () => {
 };
 
 export default Index;
-
-
