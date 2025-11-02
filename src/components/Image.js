@@ -1,162 +1,147 @@
 import React, { useState } from "react";
-import "./Image.css";
+import { useNavigate } from "react-router-dom";
+import "./App.css";
 
 const Image = () => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [modPrompt, setModPrompt] = useState("");
+  const [genMessage, setGenMessage] = useState("");
+  const [modMessage, setModMessage] = useState("");
+  const [imageUrl, setImageUrl] = useState(null);
+  const [modifiedUrl, setModifiedUrl] = useState(null);
   const [file, setFile] = useState(null);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // ===== Backend URL =====
-  const BASE_URL = "https://chatbotwithimagebackend.onrender.com"; // Flask backend
+  const BASE_URL = "http://127.0.0.1:5000";
 
-  // ===============================
-  // IMAGE GENERATION + CHAT
-  // ===============================
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-
-    setMessages((prev) => [...prev, { role: "user", content: input }]);
-    setError("");
+  // === Generate image from text ===
+  const generateImage = async () => {
+    if (!genMessage.trim()) return alert("⚠️ Enter a message for generation!");
+    setLoading(true);
+    setImageUrl(null);
 
     try {
-      // ===== IMAGE GENERATION =====
-      const imgResp = await fetch(`${BASE_URL}/generate_image`, {
+      const response = await fetch(`${BASE_URL}/image`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ message: genMessage }),
       });
 
-      const imgData = await imgResp.json();
-
-      if (imgData.image_url) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "bot", content: imgData.image_url },
-        ]);
+      const data = await response.json();
+      if (data.image_url) {
+        setImageUrl(`${data.image_url}?t=${Date.now()}`);
       } else {
-        setError("Failed to generate image");
-        console.error("Image generation error:", imgData);
-      }
-
-      // ===== CHAT RESPONSE =====
-      const chatResp = await fetch(`${BASE_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
-      });
-
-      const chatData = await chatResp.json();
-
-      if (chatData.reply) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "bot", content: chatData.reply },
-        ]);
+        alert("❌ Image generation failed.");
       }
     } catch (err) {
-      setError("Error connecting to backend");
       console.error(err);
+      alert("⚠️ Server error generating image.");
     } finally {
-      setInput("");
+      setLoading(false);
     }
   };
 
-  // ===============================
-  // IMAGE MODIFICATION
-  // ===============================
-   const modifyImage = async () => {
-  if (!file) return setError("Please upload an image first");
-  if (!modPrompt.trim()) return setError("Please enter a modification prompt");
+  // === Modify uploaded image ===
+  const modifyImage = async () => {
+    if (!file) return alert("⚠️ Upload an image first!");
+    if (!modMessage.trim()) return alert("⚠️ Enter a message for modification!");
 
-  setError("");
-  setMessages((prev) => [
-    ...prev,
-    { role: "user", content: `Modify image: ${modPrompt}` },
-  ]);
-
-  try {
     const formData = new FormData();
-    formData.append("file", file); // must match Flask backend key
-    formData.append("prompt", modPrompt);
+    formData.append("file", file);
+    formData.append("message", modMessage);
 
-    const resp = await fetch(`${BASE_URL}/modify_image`, {
-      method: "POST",
-      body: formData,
-    });
+    setLoading(true);
+    setModifiedUrl(null);
 
-    const data = await resp.json();
+    try {
+      const response = await fetch(`${BASE_URL}/image_modify`, {
+        method: "POST",
+        body: formData,
+      });
 
-    // ✅ FIX: Check for modified_image_url
-    if (data.modified_image_url) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "bot", content: data.modified_image_url },
-      ]);
-    } else {
-      setError("Image modification failed");
-      console.error("Response:", data);
+      const data = await response.json();
+      if (data.modified_image_url) {
+        setModifiedUrl(`${data.modified_image_url}?t=${Date.now()}`);
+      } else {
+        alert("❌ Image modification failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("⚠️ Server error modifying image.");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-    setError("Error modifying image");
-  } finally {
-    setFile(null);
-    setModPrompt("");
-  }
-};
+  };
 
   return (
-    <div className="ImageGenerator">
-      <h1>🖼️ Image + Chat Bot</h1>
+    <div className="landing-page">
+      <header>
+        <h1>🧠 Image Generator</h1>
+        <p>Generate or modify images independently using messages.</p>
+      </header>
 
-      {/* ===== NORMAL IMAGE GENERATION ===== */}
-      <div className="inputWrapper">
-        <input
-          type="text"
-          placeholder="Enter your prompt (e.g., a cat on the moon)"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        />
-        <button onClick={sendMessage}>Send</button>
-      </div>
+      <div className="chat-container">
 
-      {/* ===== IMAGE MODIFICATION SECTION ===== */}
-      <div className="modifyWrapper">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files[0])}
-        />
-        <input
-          type="text"
-          placeholder="Enter modification prompt (e.g., add sunset)"
-          value={modPrompt}
-          onChange={(e) => setModPrompt(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && modifyImage()}
-        />
-        <button onClick={modifyImage}>Modify Image</button>
-      </div>
+        {/* === GENERATION SECTION === */}
+        <div className="section">
+          <h2>✨ Generate Image</h2>
+          <input
+            type="text"
+            value={genMessage}
+            onChange={(e) => setGenMessage(e.target.value)}
+            placeholder="Enter message for image generation..."
+          />
+          <button type="button" onClick={generateImage} disabled={loading}>
+            {loading ? "⏳ Generating..." : "🚀 Generate Image"}
+          </button>
 
-      {error && <p className="error">{error}</p>}
+          {imageUrl && (
+            <div className="image-box">
+              <h3>Generated Image:</h3>
+              <img src={imageUrl} alt="Generated" style={{ maxWidth: "80%" }} />
+            </div>
+          )}
+        </div>
 
-      {/* ===== DISPLAY MESSAGES ===== */}
-      <div className="GeneratedImage">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={msg.role === "user" ? "userMessage" : "botMessage"}
-          >
-            {msg.content.startsWith("data:image") ||
-            msg.content.startsWith("http") ? (
-              <img src={msg.content} alt="Generated" />
-            ) : (
-              <p>{msg.content}</p>
-            )}
-          </div>
-        ))}
+        {/* === MODIFICATION SECTION === */}
+        <div className="section" style={{ marginTop: "40px" }}>
+          <h2>🪄 Modify Uploaded Image</h2>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
+          <input
+            type="text"
+            value={modMessage}
+            onChange={(e) => setModMessage(e.target.value)}
+            placeholder="Enter message for image modification..."
+            style={{ marginTop: "10px" }}
+          />
+          <button type="button" onClick={modifyImage} disabled={loading}>
+            {loading ? "⏳ Modifying..." : "🎨 Modify Image"}
+          </button>
+
+          {modifiedUrl && (
+            <div className="image-box">
+              <h3>Modified Image:</h3>
+              <img
+                src={modifiedUrl}
+                alt="Modified"
+                style={{ maxWidth: "80%" }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* === Back Navigation === */}
+        <button
+          type="button"
+          className="image-generator-btn"
+          onClick={() => navigate("/")}
+          style={{ marginTop: "30px" }}
+        >
+          ← Back to Chat
+        </button>
       </div>
     </div>
   );
