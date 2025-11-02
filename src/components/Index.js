@@ -5,25 +5,31 @@ import "./App.css";
 const Index = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Local Flask backend
+  const BASE_URL = "http://127.0.0.1:5000";
+
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      alert("⚠️ Please enter a message first!");
+      return;
+    }
 
     const userMessage = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
+    setLoading(true);
 
     try {
-      const response = await fetch("https://chatbotwithimagebackend.onrender.com/chat", {
+      const response = await fetch(`${BASE_URL}/chat`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input }),
       });
 
       const data = await response.json();
-      console.log("Response:", data);
+      console.log("💬 Response from Flask:", data);
 
       if (data.reply) {
         setMessages((prev) => [...prev, { role: "bot", content: data.reply }]);
@@ -35,32 +41,34 @@ const Index = () => {
       } else {
         setMessages((prev) => [
           ...prev,
-          { role: "bot", content: "⚠️ No response from AI." },
+          { role: "bot", content: "⚠️ No valid reply from backend." },
         ]);
       }
     } catch (error) {
       console.error("Request failed:", error);
       setMessages((prev) => [
         ...prev,
-        { role: "bot", content: "⚠️ Server error. Please try again." },
+        { role: "bot", content: "❌ Server not reachable. Check Flask." },
       ]);
+    } finally {
+      setInput("");
+      setLoading(false);
     }
-
-    setInput("");
   };
 
   return (
     <div className="landing-page">
       <header>
-        <h1>Balai Chand</h1>
-        <p>Chat with our AI assistant!</p>
+        <h1>🧠 Balai Chand</h1>
+        <p>Chat with your local AI assistant</p>
       </header>
 
       <div className="chat-container">
         <div className="chat-box">
           {messages.map((msg, index) => (
             <div key={index} className={`message ${msg.role}`}>
-              <strong>{msg.role === "user" ? "You" : "Bot"}:</strong> {msg.content}
+              <strong>{msg.role === "user" ? "You" : "Bot"}:</strong>{" "}
+              {msg.content}
             </div>
           ))}
         </div>
@@ -69,14 +77,19 @@ const Index = () => {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a message..."
+            placeholder="Type your message..."
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
-          <button onClick={sendMessage}>Send</button>
+          <button onClick={sendMessage} disabled={loading}>
+            {loading ? "Sending..." : "Send"}
+          </button>
         </div>
 
-        <button className="Image Generator" onClick={() => navigate("/image")}>
-          Go To Image Generation Page
+        <button
+          className="image-generator-btn"
+          onClick={() => navigate("/image")}
+        >
+          🖼️ Go to Image Generation
         </button>
       </div>
     </div>
