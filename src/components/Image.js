@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+  import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
 
@@ -11,7 +11,8 @@ const Image = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const BASE_URL = "http://127.0.0.1:5000";
+  // ✅ Updated to your deployed backend
+  const BASE_URL = "https://chatbotwithimagebackend.onrender.com";
 
   // === Generate image from text ===
   const generateImage = async () => {
@@ -80,7 +81,6 @@ const Image = () => {
       </header>
 
       <div className="chat-container">
-
         {/* === GENERATION SECTION === */}
         <div className="section">
           <h2>✨ Generate Image</h2>
@@ -148,10 +148,6 @@ const Image = () => {
 };
 
 export default Image;
-
-
-
-
 
 
 
